@@ -11,6 +11,8 @@ import { SocialError } from 'core/domain/common'
 import { OAuthType } from 'core/domain/authorize/oauthType'
 import moment from 'moment/moment'
 import { injectable } from 'inversify'
+import  axios from 'axios'
+
 /**
  * Firbase authorize service
  *
@@ -18,12 +20,35 @@ import { injectable } from 'inversify'
  * @class AuthorizeService
  * @implements {IAuthorizeService}
  */
+
+var GoogleProvider = new firebaseAuth.GoogleAuthProvider()
+GoogleProvider.addScope('https://www.googleapis.com/auth/contacts.readonly')
+ 
 @injectable()
 export class AuthorizeService implements IAuthorizeService {
 
   /**
    * Login the user
    */
+
+  public async GoogleLogin() {
+    try {
+      const result = await firebaseAuth()
+        .signInWithPopup(GoogleProvider)
+        const {user} = result
+        console.log(user)
+        if (user) {
+          return new LoginUser(user.uid, user.emailVerified)
+          
+        } else {
+          throw new SocialError('AuthorizeService/login', 'User object is empty!')
+        }
+
+    } catch (error) {
+      throw new SocialError(error.code, error.message)
+    }
+  }
+
   public async login(email: string, password: string) {
     try {
       const result = await firebaseAuth()
@@ -173,14 +198,16 @@ export class AuthorizeService implements IAuthorizeService {
       let provider: any
 
       switch (type) {
-        case OAuthType.GITHUB:
-          provider = new firebaseAuth.GithubAuthProvider()
-          break
-        case OAuthType.FACEBOOK:
-          provider = new firebaseAuth.FacebookAuthProvider()
-          break
+        // case OAuthType.GITHUB:
+        //   provider = new firebaseAuth.GithubAuthProvider()
+        //   break
+        // case OAuthType.FACEBOOK:
+        //   provider = new firebaseAuth.FacebookAuthProvider()
+        //   break
         case OAuthType.GOOGLE:
           provider = new firebaseAuth.GoogleAuthProvider()
+          provider.addScope('https://www.googleapis.com/auth/user.phonenumbers.read')
+
           break
         default:
           throw new SocialError('authorizeService/loginWithOAuth', 'None of OAuth type is matched!')
@@ -188,12 +215,15 @@ export class AuthorizeService implements IAuthorizeService {
       firebaseAuth().signInWithPopup(provider).then((result) => {
 
         // The signed-in user info.
+        console.log('jkfjfkdjkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkjkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')
+        console.log(result)
         const user = result.user!
         const { credential } = result
         const { uid, displayName, email, photoURL } = user
         const { providerId } = credential!
-        this.storeUserProviderData(uid, email!, displayName!, photoURL!, providerId, 'No Access token provided!')
+        // this.storeUserProviderData(uid, email!, displayName!, photoURL!, providerId, 'No Access token provided!')
         // this.storeUserInformation(uid,email,displayName,photoURL).then(resolve)
+        this.loginAtBackend(email!, displayName!, photoURL!)
         resolve(new LoginUser(user.uid, true, providerId, displayName!, email!, photoURL!))
 
       }).catch(function (error: any) {
@@ -211,12 +241,51 @@ export class AuthorizeService implements IAuthorizeService {
   }
 
   /**
+   * Login at backend
+   *
+   * @private
+   * @memberof AuthorizeService
+   */
+  private loginAtBackend = (email: string, fullName: string, avatar: string) => {
+    return new Promise<any> (() => {
+      firebaseAuth().currentUser!.getIdToken(/* forceRefresh */ true).then(function(idToken: any) {
+      
+      let payLoad = {'access_token': idToken,
+                     'email': email,
+                     'fullName': fullName,
+                     'avatar': avatar 
+                     } 
+      // console.log('Inside' + accessToken) 
+
+      axios.defaults.headers.common = {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+        }
+
+        axios
+            .post(`http://127.0.0.1:8000/auth/social/authenticate/`, payLoad)
+            .then(res => {
+              console.log(res)
+              // this.props.authLogin(res.data);
+
+              } )
+            .catch(err => console.log(err))
+
+      }).catch(function(error: any) {
+        // Handle error
+      })
+        
+  })
+}
+
+
+  /**
    * Store user information
    *
    * @private
    * @memberof AuthorizeService
    */
-  private storeUserInformation = (userId: string, email: string, fullName: string, avatar: string) => {
+ private storeUserInformation = (userId: string, email: string, fullName: string, avatar: string) => {
     return new Promise<RegisterUserResult>((resolve, reject) => {
       db.doc(`userInfo/${userId}`).set(
         {

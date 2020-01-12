@@ -48,7 +48,7 @@
             "time",
             "timeEnd"
         ],
-        "no-consecutive-blank-lines": true,
+        "no-consecutive-blank-lines": false,
         "no-construct": true,
         "no-debugger": false,
         "no-duplicate-variable": true,

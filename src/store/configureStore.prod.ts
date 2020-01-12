@@ -2,7 +2,7 @@
 import * as redux from 'redux'
 import thunk from 'redux-thunk'
 import DevTools from './devTools'
-import createHistory from 'history/createBrowserHistory'
+import { createBrowserHistory as createHistory } from 'history'
 import createSagaMiddleware, { END } from 'redux-saga'
 import { rootReducer } from 'store/reducers'
 import { fromJS } from 'immutable'

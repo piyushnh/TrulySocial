@@ -2,7 +2,7 @@
 import { createStore, applyMiddleware, compose, Store } from 'redux'
 import { composeWithDevTools } from 'redux-devtools-extension'
 import thunk from 'redux-thunk'
-import createHistory from 'history/createBrowserHistory'
+import { createBrowserHistory as createHistory } from 'history'
 import createSagaMiddleware, { END } from 'redux-saga'
 import { createLogger } from 'redux-logger'
 import { rootReducer } from 'store/reducers'

@@ -154,15 +154,8 @@ export class LoginComponent extends Component<ILoginComponentProps, ILoginCompon
     const OAuthLogin = (
       <div style={this.styles.singinOptions as any}>
         <IconButton
-          onClick={() => loginWithOAuth!(OAuthType.FACEBOOK)}
-        ><div className='icon-fb icon'></div></IconButton>
-        <IconButton
           onClick={() => loginWithOAuth!(OAuthType.GOOGLE)}
-        > <div className='icon-google icon'></div> </IconButton>
-        <IconButton
-          onClick={() => loginWithOAuth!(OAuthType.GITHUB)}
-        > <div className='icon-github icon'></div> </IconButton>
-  
+        > <div className='icon-google icon'></div> </IconButton>  
       </div>
     )
 
@@ -186,38 +179,8 @@ export class LoginComponent extends Component<ILoginComponentProps, ILoginCompon
                   {config.settings.enabledOAuthLogin ? OAuthLogin : ''}
                 
                   <Divider style={this.styles.divider} />
-                  <TextField
-                    className={classes.textField}
-                    autoFocus
-                    onChange={this.handleInputChange}
-                    helperText={this.state.emailInputError}
-                    error={this.state.emailInputError.trim() !== ''}
-                    name='emailInput'
-                    label={translate!('login.emailLabel')}
-                    type='email'
-                    tabIndex={1}
-                  /><br />
-                  <TextField
-                    className={classes.textField}
-                    onChange={this.handleInputChange}
-                    helperText={this.state.passwordInputError}
-                    error={this.state.passwordInputError.trim() !== ''}
-                    name='passwordInput'
-                    label={translate!('login.passwordLabel')}
-                    type='password'
-                    tabIndex={2}
-                  /><br />
-                  <br />
-                  <br />
-                  <div className='login__button-box'>
-                    <div>
-                      <Button onClick={this.props.signupPage} tabIndex={4}>{translate!('login.createAccountButton')}</Button>
-                    </div>
-                    <div >
-                      <Button variant='contained' color='primary' onClick={this.handleForm} tabIndex={3} >{translate!('login.loginButton')}</Button>
-                    </div>
-                  </div>
-                  <span className={classes.bottomPaper}>{translate!('login.forgetPasswordMessage')} <NavLink to='/resetPassword' className={classes.link}>{translate!('login.resetPasswordLabel')}</NavLink></span>
+
+                  <h6 className='zoomOutLCorner animated g__paper-title'>Please provide access to your contacts for the best user experience :)</h6>
                 </div>
               </form>
             </Paper>

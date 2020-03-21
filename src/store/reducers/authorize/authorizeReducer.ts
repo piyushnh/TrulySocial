@@ -19,15 +19,21 @@ export let authorizeReducer = (state = Map(new AuthorizeState() as any), action:
     case AuthorizeActionType.LOGIN:
     return state
         .set('uid', payload.uid)
+        .set('tokenId', payload.tokenId)
         .set('authed', true)
         .set('guest', false)
         .set('isVerifide', payload.isVerifide)
-
+    case AuthorizeActionType.VERIFY_PHONE:
+    return state
+        .set('phoneNumber', payload.phoneNumber)
+      
     case AuthorizeActionType.LOGOUT:
       return state
-        .set('uid', 0)
+        .set('uid', '')
+        .set('tokenId', '')
         .set('authed', false)
         .set('guest', true)
+        .set('phoneNumber', '')
         .set('isVerifide', false)
     case AuthorizeActionType.SIGNUP:
       return state

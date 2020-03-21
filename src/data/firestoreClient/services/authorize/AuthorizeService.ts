@@ -12,6 +12,7 @@ import { OAuthType } from 'core/domain/authorize/oauthType'
 import moment from 'moment/moment'
 import { injectable } from 'inversify'
 import  axios from 'axios'
+import { bool } from 'aws-sdk/clients/signer'
 
 /**
  * Firbase authorize service
@@ -136,19 +137,79 @@ export class AuthorizeService implements IAuthorizeService {
    *
    * @memberof IAuthorizeService
    */
-  public onAuthStateChanged: (callBack: (isVerifide: boolean, user: User) => void) => any = (callBack) => {
-    firebaseAuth().onAuthStateChanged((user: any) => {
+  public onAuthStateChanged: (callBack: (isVerifide: boolean, user: LoginUser) => void) => any = (callBack) => {
+     firebaseAuth().onAuthStateChanged((user: any) => {
+       console.log('In authhh changeedddd')
       let isVerifide = false
       if (user) {
         if (user.emailVerified || user.providerData[0].providerId.trim() !== 'password') {
           isVerifide = true
+        const { displayName, email, photoURL } = user
+        
+        this.loginAtBackend(email!, displayName!, photoURL!).then((backendResult: any) => {
+          
+
+          let returnUser = new LoginUser(backendResult.user.username, true, '', backendResult.user.first_name + backendResult.user.last_name,
+          backendResult.user.email!, backendResult.user.avatar_url, backendResult.user.mobile_number, backendResult.token, )
+
+          callBack(isVerifide, returnUser)
+
+        })
+         
         } else {
           isVerifide = false
+
         }
       }
       callBack(isVerifide, user)
+
+
     })
   }
+
+  /**
+   * On user entering phone number
+   * 
+   * @memberof IAuthorizeService
+   */
+  public getVerificationCode = (phoneNumber: string, recaptchaVerifier: any) => {
+        console.log('inside gettttt verifffiii' + recaptchaVerifier)
+        var provider = new firebaseAuth.PhoneAuthProvider()
+        return provider.verifyPhoneNumber(phoneNumber, recaptchaVerifier)
+            
+ }
+
+ /**
+  * Generate credential
+  * 
+  * @memberof IAuthorizeService
+  */
+  public generateCredential = (verificationId: any, verificationCode: string) => {
+
+     let phoneCredential = firebaseAuth.PhoneAuthProvider.credential(verificationId,
+              verificationCode)
+              console.log('credentialllllllll')
+      console.log(phoneCredential)
+      return phoneCredential
+
+}
+
+ /**
+  * Recaptcha to be loaded for Phone Verification
+  * 
+  * @memberof IAuthorizeService
+  */
+  public loadRecaptcha = () => {
+
+    
+    var recaptchaVerifier = new firebaseAuth.RecaptchaVerifier('recaptcha-container')
+    // recaptchaVerifier.render().then(function(widgetId: any) {
+    //   // window.recaptchaWidgetId = widgetId
+    //   return recaptchaVerifier
+
+    // })
+    return recaptchaVerifier
+ }
 
   /**
    * Reset user password
@@ -215,16 +276,15 @@ export class AuthorizeService implements IAuthorizeService {
       firebaseAuth().signInWithPopup(provider).then((result) => {
 
         // The signed-in user info.
-        console.log('jkfjfkdjkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkjkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')
-        console.log(result)
         const user = result.user!
         const { credential } = result
         const { uid, displayName, email, photoURL } = user
         const { providerId } = credential!
         // this.storeUserProviderData(uid, email!, displayName!, photoURL!, providerId, 'No Access token provided!')
         // this.storeUserInformation(uid,email,displayName,photoURL).then(resolve)
-        this.loginAtBackend(email!, displayName!, photoURL!)
-        resolve(new LoginUser(user.uid, true, providerId, displayName!, email!, photoURL!))
+        let backendResult: any = this.loginAtBackend(email!, displayName!, photoURL!)
+        resolve(new LoginUser(backendResult.user.username, true, providerId, backendResult.user.first_name + backendResult.user.last_name,
+          backendResult.user.email!, backendResult.user.avatar_url,backendResult.user.mobile_number, backendResult.token))
 
       }).catch(function (error: any) {
         // Handle Errors here.
@@ -247,7 +307,7 @@ export class AuthorizeService implements IAuthorizeService {
    * @memberof AuthorizeService
    */
   private loginAtBackend = (email: string, fullName: string, avatar: string) => {
-    return new Promise<any> (() => {
+    return new Promise<any> ((resolve, reject) => {
       firebaseAuth().currentUser!.getIdToken(/* forceRefresh */ true).then(function(idToken: any) {
       
       let payLoad = {'access_token': idToken,
@@ -264,19 +324,19 @@ export class AuthorizeService implements IAuthorizeService {
 
         axios
             .post(`http://127.0.0.1:8000/auth/social/authenticate/`, payLoad)
-            .then(res => {
-              console.log(res)
-              // this.props.authLogin(res.data);
+            .then(result => {
+
+              resolve (result.data)
 
               } )
-            .catch(err => console.log(err))
+              .catch((error: any) => reject(new SocialError(error.name, error.message)))
 
-      }).catch(function(error: any) {
-        // Handle error
-      })
+      }).catch((error: any) => reject(new SocialError(error.name, error.message)))
         
   })
 }
+
+
 
 
   /**

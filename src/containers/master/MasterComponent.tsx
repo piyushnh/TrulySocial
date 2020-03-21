@@ -14,6 +14,7 @@ import {Map} from 'immutable'
 import MasterLoading from 'src/components/masterLoading'
 import SendFeedback from 'src/components/sendFeedback'
 import MasterRouter from 'src/routes/MasterRouter'
+import GetPhoneNumberComponent from 'src/containers/getPhoneNumber'
 import { IMasterComponentProps } from './IMasterComponentProps'
 import { IMasterComponentState } from './IMasterComponentState'
 import { ServiceProvide, IServiceProvider } from 'src/core/factories'
@@ -72,6 +73,7 @@ export class MasterComponent extends Component<IMasterComponentProps, IMasterCom
 
   componentDidMount () {
 
+    // alert('mounted')
     this._authourizeService.onAuthStateChanged((isVerifide: boolean, user: any) => {
       const {
         global,
@@ -85,7 +87,7 @@ export class MasterComponent extends Component<IMasterComponentProps, IMasterCom
         hideMasterLoading
       } = this.props
       if (user) {
-        login(user.uid,isVerifide)
+        login(user, isVerifide)
         hideMasterLoading!()
         this.setState({
           loading: false,
@@ -165,8 +167,8 @@ const mapDispatchToProps = (dispatch: any, ownProps: IMasterComponentProps) => {
       dispatch(globalActions.clearTemp())
 
     },
-    login: (userId: string, isVerifide: boolean) => {
-      dispatch(authorizeActions.login(userId, isVerifide))
+    login: (user: any, isVerifide: boolean) => {
+      dispatch(authorizeActions.login(user.uid, user.tokenId, isVerifide))
     },
     logout: () => {
       dispatch(authorizeActions.logout())
@@ -205,6 +207,7 @@ const mapStateToProps = (state: Map<string, any>) => {
     guest: authorize.guest,
     uid: authorize.uid,
     authed: authorize.authed,
+    phoneNumber: authorize.phoneNumber,
     global: global
   }
 

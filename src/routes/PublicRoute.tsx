@@ -23,7 +23,7 @@ export class PublicRoute extends Component<IRoute, any> {
 const mapStateToProps = (state: Map<string, any>, nexProps: IRoute) => {
 
   return {
-    authed: state.getIn(['authorize', 'authed', false])
+    authed: state.getIn(['authorize', 'authed'])
   }
 }
 

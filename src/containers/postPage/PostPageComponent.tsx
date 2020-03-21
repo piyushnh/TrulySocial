@@ -52,8 +52,11 @@ export class PostPageComponent extends Component<IPostPageComponentProps,IPostPa
   render () {
     const St = Stream as any
     return (
+          <>
+          <h1> sjkbcbis </h1>
           <St posts={this.props.posts} displayWriting={false} />
-    )
+          </>
+          )
   }
 }
 

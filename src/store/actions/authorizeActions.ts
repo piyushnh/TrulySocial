@@ -26,10 +26,21 @@ import { SocialProviderTypes } from 'src/core/socialProviderTypes'
  * Loing user
  * @param {string} uids
  */
-export const login = (uid: string, isVerifide: boolean) => {
+export const login = (uid: string, tokenId: string, isVerifide: boolean ) => {
   return {
     type: AuthorizeActionType.LOGIN,
-    payload: { authed: true, isVerifide, uid }
+    payload: { authed: true, isVerifide, uid, tokenId }
+  }
+}
+
+/**
+ * Verify User Phone Number
+ * @param {string} phoneNumber
+ */
+export const storePhoneNumber = (phoneNumber: string ) => {
+  return {
+    type: AuthorizeActionType.VERIFY_PHONE,
+    payload: { phoneNumber: phoneNumber }
   }
 }
 
@@ -74,7 +85,7 @@ export const dbLogin = (email: string, password: string) => {
     dispatch(globalActions.showNotificationRequest())
     return authorizeService.login(email, password).then((result) => {
       dispatch(globalActions.showNotificationSuccess())
-      dispatch(login(result.uid, result.emailVerified))
+      dispatch(login(result.uid,'', result.emailVerified))
       dispatch(push('/'))
     }, (error: SocialError) => dispatch(globalActions.showMessage(error.code)))
   }
@@ -200,7 +211,11 @@ export const dbLoginWithOAuth = (type: OAuthType) => {
     return authorizeService.loginWithOAuth(type).then((result: LoginUser) => {
       // Send email verification successful.
       dispatch(globalActions.showNotificationSuccess())
-      dispatch(login(result.uid, true))
+      // if (result.phoneNumber == '')
+      // {
+
+        dispatch(login(result.uid, result.tokenId, true))
+      // }
       dispatch(push('/'))
     })
       .catch((error: SocialError) => {
@@ -208,5 +223,34 @@ export const dbLoginWithOAuth = (type: OAuthType) => {
         dispatch(globalActions.showMessage(error.code))
 
       })
+  }
+}
+
+/**
+ * Verify user's phone number
+ */
+export const dbGetVerificationCode = (phoneNumber: string,  recaptchaVerifier: any) => {
+  return (dispatch: any, getState: any) => {
+    dispatch(globalActions.showNotificationRequest())
+
+    return authorizeService.getVerificationCode(phoneNumber, recaptchaVerifier)
+  }
+}
+
+/**
+ * Verify user's phone number
+ */
+export const loadRecaptcha = () => {
+    return authorizeService.loadRecaptcha()
+}
+
+/**
+ * Verify user's phone number
+ */
+export const dbGetCredential = (verificationId: any,  verificationCode: string) => {
+  return (dispatch: any, getState: any) => {
+    dispatch(globalActions.showNotificationRequest())
+
+    return authorizeService.generateCredential(verificationId, verificationCode)
   }
 }

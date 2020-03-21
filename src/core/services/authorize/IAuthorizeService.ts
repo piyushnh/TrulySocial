@@ -8,6 +8,27 @@ import { LoginUser, RegisterUserResult, OAuthType } from 'core/domain/authorize'
  * @interface IAuthorizeService
  */
 export interface IAuthorizeService {
+    /**
+     * On entering phone number, user gets OTP
+     *
+     * @memberof IAuthorizeService
+     */
+    getVerificationCode: (phoneNumber: string, recaptchaVerifier: any) => void
+
+    /**
+     * On entering phone number, user gets OTP
+     *
+     * @memberof IAuthorizeService
+     */
+    generateCredential: (verificationId: any, verificationCode: string) => void
+
+    /**
+     * On entering phone number, user gets OTP
+     *
+     * @memberof IAuthorizeService
+     */
+    loadRecaptcha: () => void
+
 
     /**
      * Login the user
@@ -40,8 +61,9 @@ export interface IAuthorizeService {
    *
    * @memberof IAuthorizeService
    */
-  onAuthStateChanged: (callBack: (isVerifide: boolean, user: User) => void) => void
+  onAuthStateChanged: (callBack: (isVerifide: boolean, user: LoginUser) => void) => void
 
+ 
   /**
    * Reset user password
    *

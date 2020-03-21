@@ -8,7 +8,9 @@ export class LoginUser extends BaseDomain {
      private _providerId: string = '',
      private _displayName: string = '',
      private _email: string = '',
-     private _avatarURL: string = ''
+     private _avatarURL: string = '',
+     private _phoneNumber: string = '',
+     private _tokenId: string = '',
 
     ) {
     super()
@@ -49,6 +51,14 @@ export class LoginUser extends BaseDomain {
 
   public get avatarURL (): string {
     return this._avatarURL
+  }
+
+  public get tokenId (): string {
+    return this._tokenId
+  }
+
+  public get phoneNumber (): string {
+    return this._phoneNumber
   }
 
 }

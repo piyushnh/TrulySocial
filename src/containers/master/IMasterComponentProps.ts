@@ -98,6 +98,13 @@ export interface IMasterComponentProps {
      * @memberof IMasterProps
      */
   uid: string
+    /**
+     * Authed user identifier
+     *
+     * @type {string}
+     * @memberof IMasterProps
+     */
+  phoneNumber: string
 
   /**
    * Show master loading

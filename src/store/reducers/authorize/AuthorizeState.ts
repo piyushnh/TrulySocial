@@ -9,10 +9,26 @@ export class AuthorizeState {
     /**
      * Authorized user identifier
      *
-     * @type {number}
+     * @type {string}
      * @memberof AuthorizeState
      */
-  uid: number = 0
+  uid: string = ''
+
+   /**
+    * Authorized user identifier
+    *
+    * @type {string}
+    * @memberof AuthorizeState
+    */
+  tokenId: string = ''
+
+   /**
+    * Authorized user identifier
+    *
+    * @type {string}
+    * @memberof AuthorizeState
+    */
+   phoneNumber: string = ''
 
     /**
      * If user is authed {true} or not {false}
@@ -45,4 +61,6 @@ export class AuthorizeState {
      * @memberof AuthorizeState
      */
   guest: Boolean = false
+
+
 }
